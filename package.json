@@ -1,0 +1,1 @@
+{"name":"silicon-lab-gpu-architect","version":"1.2.0","private":true,"type":"module","scripts":{"start":"node server.mjs","test":"node --test tests.mjs economy-tests.mjs fabric-tests.mjs"}}
