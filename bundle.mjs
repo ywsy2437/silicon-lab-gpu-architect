@@ -1,0 +1,13 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import path from 'node:path';
+import {Script} from 'node:vm';
+const base=path.dirname(fileURLToPath(import.meta.url));
+const [html,css,businessCss,fabricCss,fabric,engine,fabricUI,commerce,app]=await Promise.all(['index.html','style.css','business.css','fabric.css','fabric.mjs','engine.mjs','fabric-ui.js','commerce.js','app.js'].map(f=>readFile(path.join(base,'dist',f),'utf8')));
+const strip=s=>s.replace(/^import[^\n]+\n/gm,'').replace(/^export /gm,'');
+const code=strip(fabric)+'\n'+strip(engine)+'\n'+strip(fabricUI)+'\n'+strip(commerce)+'\n'+strip(app);
+new Script(code,{filename:'gpu-offline.js'});
+const bundled=html.replace('<link rel="stylesheet" href="style.css">',()=>'<style>'+css+'\n'+businessCss+'\n'+fabricCss+'</style>').replace('<link rel="stylesheet" href="business.css">','').replace('<link rel="stylesheet" href="fabric.css">','').replace('<script type="module" src="app.js"></script>',()=>'<script type="module">'+code+'</script>');
+const output=path.join(base,'..','GPU芯片设计游戏.html');
+await writeFile(output,bundled,'utf8');
+console.log('Standalone offline game: '+output);
